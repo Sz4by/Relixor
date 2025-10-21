@@ -1,0 +1,29 @@
+name: Android CI Build APK
+
+on:
+  # Futás minden push (feltöltés) esetén a 'kiwi' ágon
+  push:
+    branches: [ "kiwi" ] # Jelenleg a 'kiwi' ágban vagy
+  # Ezt hagyd bent, ha manuálisan akarod indítani
+  workflow_dispatch: 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    # ... A kód többi része változatlan ...
+    # ... 4. lépés: Debug APK fordítása
+    - name: Debug APK fordítása
+      # Csak a Debug buildet futtatjuk, ami a legegyszerűbb.
+      run: ./gradlew assembleDebug 
+      
+    # ... 5. lépés: Az elkészült APK feltöltése
+    - name: Debug APK Feltöltése Artifact-ként
+      uses: actions/upload-artifact@v3
+      with:
+        name: RELIXOR-APK-KESZ
+        # Ha az app modulnak más a neve, EZEN AZ ÚTVONALON VAN A HIBA!
+        # Ha nem találja itt, a build mégis sikeresnek tűnhet.
+        path: app/build/outputs/apk/debug/app-debug.apk 
+        retention-days: 7
+        
