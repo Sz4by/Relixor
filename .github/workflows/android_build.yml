@@ -1,0 +1,51 @@
+name: Android CI Build APK
+
+# Ez határozza meg, hogy mikor fusson le a munkafolyamat
+on:
+  # Futás minden push (feltöltés) esetén a 'main' vagy 'master' ágon
+  push:
+    branches: [ "main", "master" ]
+  # Futás minden Pull Request (összevonási kérelem) esetén
+  pull_request:
+    branches: [ "main", "master" ]
+  # Lehetővé teszi, hogy manuálisan indítsd el az Actions fülön
+  workflow_dispatch:
+
+jobs:
+  build:
+    # A munkafolyamat Ubuntu Linuxon fut
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. lépés: Kód klónozása
+    - name: Checkout kód
+      uses: actions/checkout@v3
+
+    # 2. lépés: Java (JDK) beállítása
+    - name: JDK 17 beállítása
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        # Gyorsítótár (cache) használata a Gradle függőségekhez
+        cache: 'gradle'
+
+    # 3. lépés: A Gradle wrapper (gradlew) futtathatóvá tétele
+    - name: Futtatási jogosultság megadása a gradlew-nek
+      run: chmod +x gradlew
+
+    # 4. lépés: Debug APK fordítása
+    - name: Debug APK fordítása
+      # Az 'assembleDebug' Gradle parancs generálja a Debug APK-t
+      run: ./gradlew assembleDebug
+
+    # 5. lépés: Az elkészült APK feltöltése
+    - name: Debug APK Feltöltése Artifact-ként
+      uses: actions/upload-artifact@v3
+      with:
+        # A feltöltött fájl neve a GitHub Actions felületen
+        name: Relixor_Debug_APK
+        # Az alapértelmezett útvonal a Debug APK-hoz Android projektekben
+        path: app/build/outputs/apk/debug/app-debug.apk
+        # A fájl ennyi napig maradjon elérhető
+        retention-days: 7
